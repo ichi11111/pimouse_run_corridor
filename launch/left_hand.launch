@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find pimouse_ros)/launch/pimouse.launch" /> 
+  <node pkg="pimouse_run_corridor" name="left_hand" type="left_hand.py" required="true" />
+</launch>
