@@ -21,6 +21,15 @@ class Left_hand():
     def callback_lightsensors(self,messages):
         self.sensor_values = messages
 
+    def wall_front(self,value):
+        return self.sensor_values.left_forward > value or self.sensor_values.right_forward > value
+
+    def wall_right(self,value):
+        return self.sensor_values.right_side > value
+     
+    def wall_left(self,value):
+        return self.sensor_values.left_side > value
+
     def run(self):
         rate = rospy.Rate(20)
         data = Twist()
@@ -28,14 +37,23 @@ class Left_hand():
         data.linear.x = 0.0
         data.angular.z = 0.0
         while not rospy.is_shutdown():
-            data.linear.x = 0.3
-
+            data.linear.x = 0.0
             e = 0.5 * (200 - self.sensor_values.left_side)  # 目標値とセンサ値の偏差
-            data.angular.z = e * math.pi / 180.0            # 偏差が0になるようにフィードバック制御
-	    if self.sensor_values.left_forward > 100 and self.sensor_values.right_forward > 100:
-		data.linear.x = 0.0
-                data.angular.z = -200 * math.pi / 180.0
-            """
+            data.angular.z = 0*e * math.pi / 180.0            # 偏差が0になるようにフィードバック制御
+	    if not self.wall_left(50):
+		data.linear.x = 0.2
+                data.angular.z = 180 * math.pi / 180.0
+            elif not self.wall_front(150):
+		data.linear.x = 0.3
+		e = 0.5 * (200 - self.sensor_values.left_side)
+                data.angular.z = e * math.pi / 180.0 
+	    elif not self.wall_front(500):
+		data.linear.x = 0.2
+                data.angular.z = -180 * math.pi / 180.0	
+	    else:
+                data.linear.x = 0.0
+                data.angular.z = -180 * math.pi / 180.0 
+	    """
             if self.sensor_values.left_side > 200
                 e = 1.0 * (200 - self.sensor_values.left_side)
                 data.angular.z = e * math.pi / 180.0 
@@ -63,4 +81,3 @@ if __name__ == '__main__':
                            
     p = Left_hand()
     p.run()
-                                            
