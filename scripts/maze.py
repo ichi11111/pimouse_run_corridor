@@ -35,17 +35,17 @@ class Maze():
     
     def move_straight(self,mode=0):
         if mode == 1:
-            time = 12
+            time = 24
             hz =800
         else:
-            time = 23
+            time = 46
             hz =400          
-        rate = rospy.Rate(20)
+        rate = rospy.Rate(40)
         for i in range(time):
-            if self.sensor_values.left_side > 100:
-                e = int(260 - self.sensor_values.left_side)  # 目標値とセンサ値の偏差
-            elif self.sensor_values.right_side > 100:
-                e = -int(260 - self.sensor_values.right_side)  # 目標値とセンサ値の偏差
+            if self.sensor_values.left_side > 200:
+                e = int(0.3*(600 - self.sensor_values.left_side))  # 目標値とセンサ値の偏差
+            elif self.sensor_values.right_side > 200:
+                e = -int(0.3*(600 - self.sensor_values.right_side))  # 目標値とセンサ値の偏差
             else:
                 e = 0
             self.raw.publish(hz-e,hz+e)   # 偏差が0になるようにフィードバック制御
@@ -54,12 +54,12 @@ class Maze():
     
     def turn_left(self,mode=0):
         if mode == 1:
-            time = 4
+            time = 9
             hz =800
         else:
-            time = 10
+            time = 19
             hz =400 
-        rate = rospy.Rate(20)
+        rate = rospy.Rate(40)
         for i in range(time):
             self.raw.publish(-hz,hz)
             rate.sleep()
@@ -67,12 +67,12 @@ class Maze():
         
     def turn_right(self,mode=0):
         if mode == 1:
-            time = 4
+            time = 9
             hz =800
         else:
-            time = 10
+            time = 19
             hz =400 
-        rate = rospy.Rate(20)
+        rate = rospy.Rate(40)
         for i in range(time):
             self.raw.publish(hz,-hz)
             rate.sleep()
@@ -80,12 +80,12 @@ class Maze():
         
     def turn(self,mode=0):
         if mode == 1:
-            time = 9
+            time = 18
             hz =800
         else:
-            time = 19
+            time = 38
             hz =400 
-        rate = rospy.Rate(20)
+        rate = rospy.Rate(40)
         for i in range(time):
             self.raw.publish(-hz,hz)
             rate.sleep()
@@ -94,7 +94,7 @@ class Maze():
 # switch0が押されるまで待機する関数
     def wait_switch0(self):
         switch0 = False
-        while switch0 == False:
+        while switch0 == False and (not rospy.is_shutdown()):
             with open('/dev/rtswitch0','r') as f:
                 switch0 = True if '0' in f.readline() else False
 
@@ -174,7 +174,7 @@ class Maze():
 # 足立法
     def run(self): 
         # 変数設定
-        x_length = 4  # 横幅
+        x_length = 5  # 横幅
         y_length = 3  # 縦幅
         wall = [[0 for _ in range(y_length)] for _ in range(x_length)]         # 壁情報配列作成 (0:壁あり,1:壁なし)(****:北東南西)
         passed_cell = [[0 for _ in range(y_length)] for _ in range(x_length)]  # 通過確認配列作成(0:未通過,1:通過済)
@@ -182,7 +182,7 @@ class Maze():
         h_map = [[1000 for _ in range(y_length)] for _ in range(x_length)]     # 等高線マップ
         self.x, self.y = 0,0         # 現在のxy座標
         start_x, start_y = 0,0     # スタートのxy座標
-        goal_x, goal_y = 4-1,3-1   # ゴールのxy座標
+        goal_x, goal_y = 5-1,3-1   # ゴールのxy座標
         self.head = 0  # 姿勢(0:北,1:東,2:南,3:西)
         mode = 0  # 0:探索中, 1:最短距離移動中, 2:ゴール
         return_flag = 0 #リターン中かどうか
@@ -281,19 +281,18 @@ class Maze():
         self.turn()
         self.head = (self.head+2)%4
         mode = 1
+
+	while mode==1 and (not rospy.is_shutdown()):                
+      	    # switch0が押されるまで待機
+            self.wait_switch0()
                 
-        # switch0が押されるまで待機
-        self.wait_switch0()
-                
-        # 最短距離移動モード
-        h_map = self.h_map_func(wall,goal_x,goal_y)   # 等高線マップ計算
-        with open("/home/ubuntu/test/h_map",'w') as f:
-                    f.write(str(h_map))
-        self.navigation_func(wall, h_map, goal_x, goal_y,mode)
-        
-        # 空ループで停止維持
-        while mode==1 and (not rospy.is_shutdown()):
-            mode = 1
+            # 最短距離移動モード
+	    self.x, self.y = 0,0
+            self.head = 0
+	    h_map = self.h_map_func(wall,goal_x,goal_y)   # 等高線マップ計算
+            with open("/home/ubuntu/test/h_map",'w') as f:
+                f.write(str(h_map))
+            self.navigation_func(wall, h_map, goal_x, goal_y,mode)
 
 if __name__ == '__main__':
     rospy.init_node('maze')

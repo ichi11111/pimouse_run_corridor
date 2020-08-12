@@ -35,38 +35,38 @@ class Left_hand():
     
     def move_straight(self):
         #self.motor_timed_motion(400,400,1150)
-        rate = rospy.Rate(20)
-        for i in range(12):
+        rate = rospy.Rate(50)
+        for i in range(18):
             if self.sensor_values.left_side > 100:
                 e = int(260 - self.sensor_values.left_side)  # 目標値とセンサ値の偏差
 	    elif self.sensor_values.right_side > 100:
                 e = -int(260 - self.sensor_values.right_side)  # 目標値とセンサ値の偏差
             else:
                 e = 0
-            self.raw.publish(800-e,800+e)   # 偏差が0になるようにフィードバック制御
+            self.raw.publish(1500-e,1500+e)   # 偏差が0になるようにフィードバック制御
             rate.sleep()
 	self.raw.publish(0,0)
 	#self.motor_timed_motion(0,0,500)            
     def turn_left(self):
         #self.motor_timed_motion(-400,400,465)
-    	rate = rospy.Rate(20)
-        for i in range(4):
+    	rate = rospy.Rate(50)
+        for i in range(12):
             self.raw.publish(-800,800)
             rate.sleep()
 	self.raw.publish(0,0)
         #self.motor_timed_motion(0,0,500)
     def turn_right(self):
         #self.motor_timed_motion(400,-400,465)
-	rate = rospy.Rate(20)
-        for i in range(4):
+	rate = rospy.Rate(50)
+        for i in range(12):
             self.raw.publish(800,-800)
             rate.sleep()
 	self.raw.publish(0,0)
         #self.motor_timed_motion(0,0,500)
     def turn(self):
         #self.motor_timed_motion(400,-400,465*2)
-	rate = rospy.Rate(20)
-        for i in range(9):
+	rate = rospy.Rate(50)
+        for i in range(25):
             self.raw.publish(-800,800)
             rate.sleep()
 	self.raw.publish(0,0)
