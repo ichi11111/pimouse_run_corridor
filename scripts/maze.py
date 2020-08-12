@@ -76,6 +76,11 @@ class Left_hand():
 	self.raw.publish(0,0)
         self.motor_timed_motion = rospy.ServiceProxy('/timed_motion', TimedMotion)
         self.motor_timed_motion(0,0,1000)        # data.left_hz,data.right_hz,time
+        # switch0が押されるまで待機
+        switch0 = False
+        while switch0 == False:
+            with open('/dev/rtswitch0','r') as f:
+                switch0 = True if '0' in f.readline() else False
         while not rospy.is_shutdown():
             if not self.wall_left():
                 self.turn_left()
