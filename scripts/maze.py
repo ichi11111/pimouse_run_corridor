@@ -24,13 +24,13 @@ class Maze():
     def callback_lightsensors(self,messages):
         self.sensor_values = messages
 
-    def wall_front(self,sensor,value = 100):
+    def wall_front(self,sensor,value = 200):
         return 0.5*(sensor.left_forward + sensor.right_forward) > value
 
-    def wall_right(self,sensor,value = 100):
+    def wall_right(self,sensor,value = 200):
         return sensor.right_side > value
 
-    def wall_left(self,sensor,value = 100):
+    def wall_left(self,sensor,value = 200):
         return sensor.left_side > value
     
     def move_straight(self,mode=0):
@@ -42,9 +42,9 @@ class Maze():
             hz =400          
         rate = rospy.Rate(40)
         for i in range(time):
-            if self.sensor_values.left_side > 200:
-                e = int(0.3*(600 - self.sensor_values.left_side))  # 目標値とセンサ値の偏差
-            elif self.sensor_values.right_side > 200:
+            if self.sensor_values.left_side > 300:
+                e = int(0.3*(800 - self.sensor_values.left_side))  # 目標値とセンサ値の偏差
+            elif self.sensor_values.right_side > 300:
                 e = -int(0.3*(600 - self.sensor_values.right_side))  # 目標値とセンサ値の偏差
             else:
                 e = 0
@@ -131,7 +131,7 @@ class Maze():
 # 目的地まで移動する関数
     def navigation_func(self, wall, h_map, dest_x, dest_y,mode):
         reach = False
-        while reach == False:
+        while reach == False and (not rospy.is_shutdown()):
             sensor = self.sensor_values
             q = []
             cos = int(math.cos(0.5*math.pi*self.head))

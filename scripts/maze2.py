@@ -24,50 +24,50 @@ class Left_hand():
     def callback_lightsensors(self,messages):
         self.sensor_values = messages
 
-    def wall_front(self,value = 100):
+    def wall_front(self,value = 200):
         return 0.5*(self.sensor_values.left_forward + self.sensor_values.right_forward) > value
 
-    def wall_right(self,value = 100):
+    def wall_right(self,value = 200):
         return self.sensor_values.right_side > value
 
-    def wall_left(self,value = 100):
+    def wall_left(self,value = 200):
         return self.sensor_values.left_side > value
     
     def move_straight(self):
         #self.motor_timed_motion(400,400,1150)
-        rate = rospy.Rate(50)
-        for i in range(18):
-            if self.sensor_values.left_side > 100:
-                e = int(260 - self.sensor_values.left_side)  # 目標値とセンサ値の偏差
-	    elif self.sensor_values.right_side > 100:
-                e = -int(260 - self.sensor_values.right_side)  # 目標値とセンサ値の偏差
+        rate = rospy.Rate(40)
+        for i in range(46):
+            if self.sensor_values.left_side > 300:
+                e = int(0.3*(800 - self.sensor_values.left_side))  # 目標値とセンサ値の偏差
+	    elif self.sensor_values.right_side > 300:
+                e = -int(0.3*(600 - self.sensor_values.right_side))  # 目標値とセンサ値の偏差
             else:
                 e = 0
-            self.raw.publish(1500-e,1500+e)   # 偏差が0になるようにフィードバック制御
+            self.raw.publish(400-e,400+e)   # 偏差が0になるようにフィードバック制御
             rate.sleep()
 	self.raw.publish(0,0)
 	#self.motor_timed_motion(0,0,500)            
     def turn_left(self):
         #self.motor_timed_motion(-400,400,465)
-    	rate = rospy.Rate(50)
-        for i in range(12):
-            self.raw.publish(-800,800)
+    	rate = rospy.Rate(40)
+        for i in range(19):
+            self.raw.publish(-400,400)
             rate.sleep()
 	self.raw.publish(0,0)
         #self.motor_timed_motion(0,0,500)
     def turn_right(self):
         #self.motor_timed_motion(400,-400,465)
-	rate = rospy.Rate(50)
-        for i in range(12):
-            self.raw.publish(800,-800)
+	rate = rospy.Rate(40)
+        for i in range(19):
+            self.raw.publish(400,-400)
             rate.sleep()
 	self.raw.publish(0,0)
         #self.motor_timed_motion(0,0,500)
     def turn(self):
         #self.motor_timed_motion(400,-400,465*2)
-	rate = rospy.Rate(50)
-        for i in range(25):
-            self.raw.publish(-800,800)
+	rate = rospy.Rate(40)
+        for i in range(38):
+            self.raw.publish(-400,400)
             rate.sleep()
 	self.raw.publish(0,0)
         #self.motor_timed_motion(0,0,500)
@@ -77,6 +77,7 @@ class Left_hand():
         self.motor_timed_motion = rospy.ServiceProxy('/timed_motion', TimedMotion)
         self.motor_timed_motion(0,0,1000)        # data.left_hz,data.right_hz,time
         while not rospy.is_shutdown():
+#	    self.move_straight()
             if not self.wall_left():
                 self.turn_left()
                 self.move_straight()
