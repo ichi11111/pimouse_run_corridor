@@ -54,7 +54,7 @@ class Maze():
     
     def turn_left(self,mode=0):
         if mode == 1:
-            time = 9
+            time = 10
             hz =800
         else:
             time = 19
@@ -67,7 +67,7 @@ class Maze():
         
     def turn_right(self,mode=0):
         if mode == 1:
-            time = 9
+            time = 10
             hz =800
         else:
             time = 19
